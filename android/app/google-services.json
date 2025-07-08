@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1022506800132",
+    "project_id": "facify-app",
+    "storage_bucket": "facify-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1022506800132:android:b04904b99dea6107ce9151",
+        "android_client_info": {
+          "package_name": "com.example.facify"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuBAEvGaHxqA3GcoYd-tIuc9qL4CcYaNM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
