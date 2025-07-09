@@ -5,6 +5,7 @@ import 'home.dart'; // your main face detection screen
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
+
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
