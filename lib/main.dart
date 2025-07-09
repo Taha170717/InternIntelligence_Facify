@@ -1,3 +1,4 @@
+import 'package:facify/Splash_Screen.dart';
 import 'package:facify/home.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
@@ -21,7 +22,7 @@ class FaceApp extends StatelessWidget{
         primarySwatch: Colors.blue,
 
       ),
-      home: Home(),
+      home: SplashScreen()
     );
   }
   

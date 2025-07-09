@@ -1,9 +1,8 @@
 import 'dart:typed_data';
 import 'dart:ui';
-
-import 'package:camera/camera.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:camera/camera.dart';
 
 class UtilsScanner {
   UtilsScanner._();
@@ -15,64 +14,62 @@ class UtilsScanner {
     );
   }
 
-  static ImageRotation rotationintToImageRotation(int rotation) {
+  static InputImageRotation rotationIntToImageRotation(int rotation) {
     switch (rotation) {
       case 0:
-        return ImageRotation.rotation0;
+        return InputImageRotation.rotation0deg;
       case 90:
-        return ImageRotation.rotation90;
+        return InputImageRotation.rotation90deg;
       case 180:
-        return ImageRotation.rotation180;
+        return InputImageRotation.rotation180deg;
       case 270:
-        return ImageRotation.rotation270;
+        return InputImageRotation.rotation270deg;
       default:
         throw ArgumentError('Invalid rotation value: $rotation');
     }
   }
 
-  /// Concatenate camera image planes into single byte buffer
+  static InputImageFormat imageFormatFromRaw(int rawFormat) {
+    switch (rawFormat) {
+      case 35:
+        return InputImageFormat.nv21;
+      case 17:
+        return InputImageFormat.yv12;
+      default:
+        return InputImageFormat.nv21; // fallback
+    }
+  }
+
   static Uint8List concatenatePlanes(List<Plane> planes) {
     final WriteBuffer allBytes = WriteBuffer();
-    for (Plane plane in planes) {
+    for (final Plane plane in planes) {
       allBytes.putUint8List(plane.bytes);
     }
     return allBytes.done().buffer.asUint8List();
   }
 
-  /// Build metadata for FirebaseVisionImage
-  static FirebaseVisionImageMetadata buildMetaData(
-      CameraImage image,
-      ImageRotation rotation,
-      ) {
-    return FirebaseVisionImageMetadata(
+  static InputImageMetadata buildMetaData(CameraImage image, InputImageRotation rotation) {
+    return InputImageMetadata(
       size: Size(image.width.toDouble(), image.height.toDouble()),
       rotation: rotation,
-      rawFormat: image.format.raw,
-      planeData: image.planes.map(
-            (Plane plane) {
-          return FirebaseVisionImagePlaneMetadata(
-            bytesPerRow: plane.bytesPerRow,
-            height: plane.height,
-            width: plane.width,
-          );
-        },
-      ).toList(),
+      format: imageFormatFromRaw(image.format.raw),
+      bytesPerRow: image.planes.first.bytesPerRow,
     );
   }
 
-  /// Detect using the given detectInImage function
-  static Future<dynamic> detect({
+  static Future<List<Face>> detect({
     required CameraImage image,
-    required Future<dynamic> Function(FirebaseVisionImage image) detectInImage,
+    required FaceDetector faceDetector,
     required int imageRotation,
   }) async {
-    final metadata = buildMetaData(image, rotationintToImageRotation(imageRotation));
-
-    final visionImage = FirebaseVisionImage.fromBytes(
-      concatenatePlanes(image.planes),
-      metadata,
+    final InputImageRotation rotation = rotationIntToImageRotation(imageRotation);
+    final metadata = buildMetaData(image, rotation);
+    final inputImage = InputImage.fromBytes(
+      bytes: concatenatePlanes(image.planes),
+      metadata: metadata,
     );
 
-    return await detectInImage(visionImage);
+    final List<Face> faces = await faceDetector.processImage(inputImage);
+    return faces;
   }
 }
